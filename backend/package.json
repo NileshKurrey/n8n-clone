@@ -1,7 +1,7 @@
 {
-  "name": "leetblast-backend",
+  "name": "neuroai-backend",
   "version": "1.0.0",
-  "description": "leetcode clone",
+  "description": "a subconsious mind therapy voice agent backend",
   "license": "ISC",
   "author": "",
   "type": "module",

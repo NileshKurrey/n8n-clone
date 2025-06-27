@@ -21,48 +21,40 @@ model User {
   password   String?
   isAdmin    Boolean    @default(false)
   isVerified Boolean    @default(false)
-  workflows  Workflow[]
   createdAt  DateTime   @default(now())
+   reports           Report[]
+  sessions   ChatSession[]
 }
 
-model Workflow {
-  id          String      @id @default(uuid())
-  name        String
-  description String?
-  userId      String
-  user        User        @relation(fields: [userId], references: [id])
-  nodes       Node[]
-  connections Connection[]
-  executions  Execution[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+model ChatSession {
+  id            String           @id @default(uuid())
+  user          User             @relation(fields: [userId], references: [id])
+  userId        String
+  startedAt     DateTime         @default(now())
+  endedAt       DateTime?
+  moodSummary   String?
+  emotionScore  Json?
+  reportStatus  String           @default("pending") // e.g., 'pending', 'generated'
+  reports       Report[]
 }
+model Report {
+  id         String       @id @default(uuid())
 
-model Node {
-  id         String   @id @default(uuid())
-  workflow   Workflow @relation(fields: [workflowId], references: [id])
-  workflowId String
-  type       String    // e.g., "llm", "prompt", "tool", etc.
-  config     Json
-  positionX  Float
-  positionY  Float
-  createdAt  DateTime  @default(now())
-}
-
-model Connection {
-  id        String  @id @default(uuid())
-  workflow  Workflow @relation(fields: [workflowId], references: [id])
-  workflowId String
-  fromNodeId String
-  toNodeId   String
-}
-
-model Execution {
-  id          String     @id @default(uuid())
-  workflow    Workflow   @relation(fields: [workflowId], references: [id])
-  workflowId  String
-  status      String     // e.g., "running", "completed", "failed"
-  startedAt   DateTime   @default(now())
-  finishedAt  DateTime?
-  logs        Json?
+  sessionId  String       @unique
+  userId    String       @map("user_id")
+  summary    String
+  insights   Json
+  suggestions String
+  createdAt  DateTime     @default(now())
+  generatedAt         DateTime @default(now()) @map("generated_at")
+  behavioralInsights  Json?    @map("behavioral_insights")
+  recommendations     Json?
+  progressMetrics     Json?    @map("progress_metrics")
+  reportData          Json?    @map("report_data") // Complete report content
+  
+  // Relations
+  session             ChatSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("reports")
 }
